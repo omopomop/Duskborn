@@ -67,27 +67,26 @@ var Player = function(id){
 		self.updateSpd();
 		//updates position in entity
 		super_update();
-		}
+	}
 	
 	self.updateSpd = function(){
 		if(self.rb){
 			self.spdX = 5;
 		}	
-		else if(self.lb){
+		if(self.lb){
 			self.spdX = -5;
 		}
-		
 		if(self.ub){
 			self.spdY = -5;
 		}
-		else if(self.db){
+		if(self.db){
 			self.spdY = 5;
 		}
 		
-		if(!self.ub && !self.db){
+		if(self.ub == self.db){
 			self.spdY = 0;
 		}
-		if(!self.rb && !self.lb){
+		if(self.rb == self.lb){
 			self.spdX = 0;
 		}
 		
@@ -124,16 +123,16 @@ Player.onConnect = function(socket){
 	console.log("PLAYER ON CONNECT USERNAME IS "+player.username);
 	playerCount++;
 	socket.on('keyPress',function(data){
-		if(data.inputId==='l'){
+		if(data.inputId==='a'){
 			player.lb = data.state;
 		}
-		else if(data.inputId==='r'){
+		else if(data.inputId==='d'){
 			player.rb = data.state;
 		}
-		else if(data.inputId==='u'){
+		else if(data.inputId==='w'){
 			player.ub = data.state;
 		}
-		else if(data.inputId==='d'){
+		else if(data.inputId==='s'){
 			player.db = data.state;
 		}
 	});

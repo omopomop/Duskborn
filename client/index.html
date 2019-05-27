@@ -128,25 +128,26 @@
 	//check for button presses
 	document.onkeydown = function(event){
 		if(event.keyCode === 68)
-			socket.emit('keyPress',{inputId:'r',state:true});
-		else if(event.keyCode === 83)
 			socket.emit('keyPress',{inputId:'d',state:true});
-		else if(event.keyCode === 65)
-			socket.emit('keyPress',{inputId:'l',state:true});
-		else if(event.keyCode === 87)
-			socket.emit('keyPress',{inputId:'u',state:true});
+		if(event.keyCode === 83)
+			socket.emit('keyPress',{inputId:'s',state:true});
+		if(event.keyCode === 65)
+			socket.emit('keyPress',{inputId:'a',state:true});
+		if(event.keyCode === 87)
+			socket.emit('keyPress',{inputId:'w',state:true});
+			
 
 	}
 	
 	document.onkeyup = function(event){
 		if(event.keyCode === 68)
-			socket.emit('keyPress',{inputId:'r',state:false});
-		else if(event.keyCode === 83)
 			socket.emit('keyPress',{inputId:'d',state:false});
-		else if(event.keyCode === 65)
-			socket.emit('keyPress',{inputId:'l',state:false});
-		else if(event.keyCode === 87)
-			socket.emit('keyPress',{inputId:'u',state:false});
+		if(event.keyCode === 83)
+			socket.emit('keyPress',{inputId:'s',state:false});
+		if(event.keyCode === 65)
+			socket.emit('keyPress',{inputId:'a',state:false});
+		if(event.keyCode === 87)
+			socket.emit('keyPress',{inputId:'w',state:false});
 
 	}
 </script>
