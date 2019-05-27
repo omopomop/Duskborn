@@ -1,0 +1,152 @@
+<!--Sign in page-->
+</style>
+</head>
+<div id="signin" class="modal">
+  <form class="modal-content animate">
+    <div>
+      <label><b>Username</b></label>
+      <input id="signin-username" type="text" placeholder="Enter Username" name="uname" required>
+      <button type="button" id="signin-login">Start</button>
+    </div>
+  </form>
+</div>
+<!--main game-->
+<div id="maingame" style="display:none;">
+	<canvas id="ctx" width="600" height="600" style="border:1px
+	solid #000000;"></canvas>
+	
+</div>
+
+<script src="http://cdn.socket.io/socket.io-1.4.5.js"
+></script>
+<script>
+
+	var socket = io();
+	
+	var signin = document.getElementById('signin');
+	var signinUsername = document.getElementById('signin-username');
+	var signinLogin = document.getElementById('signin-login');
+	
+	signinLogin.onclick = function(){
+		socket.emit('signedin',{username:signinUsername.value});
+		signin.style.display = 'none';
+		maingame.style.display = 'inline-block';
+	}
+	
+	
+	var ctx = document.getElementById("ctx").
+	getContext("2d");
+	ctx.font = '30px Arial';
+	var WIDTH = 600;
+	var HEIGHT = 600;
+	
+	var Img = {};
+	Img.map = new Image();
+	Img.map.src = 'client/img/map.png';
+	Img.user = new Image();
+	Img.user.src = 'client/img/user.png';
+	
+	
+	//player var 
+	var Player = function(iPack){
+		var self = {};
+		self.id = iPack.id;
+		self.number = iPack.number;
+		self.x = iPack.x;
+		self.y = iPack.y;
+		self.score = iPack.score;
+		self.username = iPack.username;
+		
+		self.draw = function(){
+		
+			var x = self.x - Player.list[playerId].x + WIDTH/2;
+			var y = self.y - Player.list[playerId].y + HEIGHT/2;
+			
+			ctx.drawImage(Img.user,0,0,Img.user.width,Img.user.height,x-30,y-25,70,50);
+			ctx.textAlign="center";
+			ctx.fillText(self.username,x,y+45);
+		}
+		
+		
+		Player.list[self.id] = self;
+		return self;
+	}
+	Player.list = {};
+	
+	var socket = io();
+	
+	var playerId = null;
+	//draw the change of map position relative to a centered player
+	var drawMap = function(){
+		var x = WIDTH/2 - Player.list[playerId].x;
+		var y = HEIGHT/2 - Player.list[playerId].y;
+		ctx.drawImage(Img.map,x,y);
+	}
+	
+	//initialize a player
+	socket.on('init',function(data){
+		
+		if(data.playerId)
+			playerId = data.playerId;
+		for(var i = 0; i < data.player.length; i++){
+			new Player(data.player[i]);
+			//socket.emit('playercreated');
+		}
+	});
+	
+	//delete user from map
+	socket.on('delete',function(data){
+		for(var i = 0; i < data.player.length; i++)
+			delete Player.list[data.player[i]];
+	});
+	//update player location
+	socket.on('update',function(data){
+		for(var i = 0; i < data.player.length; i++){
+			var pack = data.player[i];
+			var p = Player.list[pack.id];
+			if(p){
+				if(pack.x !== undefined)
+					p.x = pack.x;
+				if(pack.y !== undefined)
+					p.y = pack.y;
+			}
+
+		}
+	});
+	//interval for drawing map
+	setInterval(function(){
+		if(!playerId)
+			return;
+			
+		ctx.clearRect(0,0,2000,2000);
+		drawMap();
+		for(var i in Player.list){
+			Player.list[i].draw();
+		}
+	},40);
+	
+	//check for button presses
+	document.onkeydown = function(event){
+		if(event.keyCode === 68)
+			socket.emit('keyPress',{inputId:'r',state:true});
+		else if(event.keyCode === 83)
+			socket.emit('keyPress',{inputId:'d',state:true});
+		else if(event.keyCode === 65)
+			socket.emit('keyPress',{inputId:'l',state:true});
+		else if(event.keyCode === 87)
+			socket.emit('keyPress',{inputId:'u',state:true});
+
+	}
+	
+	document.onkeyup = function(event){
+		if(event.keyCode === 68)
+			socket.emit('keyPress',{inputId:'r',state:false});
+		else if(event.keyCode === 83)
+			socket.emit('keyPress',{inputId:'d',state:false});
+		else if(event.keyCode === 65)
+			socket.emit('keyPress',{inputId:'l',state:false});
+		else if(event.keyCode === 87)
+			socket.emit('keyPress',{inputId:'u',state:false});
+
+	}
+</script>
