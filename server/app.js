@@ -58,39 +58,96 @@ var Player = function(id){
 	self.lb = false;
 	self.ub = false;
 	self.db = false;
+	self.qb = false;
+	self.eb = false;
 	self.maxSpd = 5;
 	self.username = tempuser;
+	self.degree = 0;
 	
 	var super_update = self.update;
 	self.update = function(){
 		//updates speed
+		self.updateAngle();
 		self.updateSpd();
 		//updates position in entity
 		super_update();
 	}
-	
+	self.updateAngle = function(){
+		if(self.qb){
+			console.log("PRESSING Q");
+			self.degree -= 1;
+			if(self.degree < 0)
+				self.degree = 360;
+		}
+		
+		if(self.eb){
+			console.log("PRESSING E");
+			self.degree += 1;
+			if(self.degree > 360)
+				self.degree = 0;
+		}
+		
+	}
 	self.updateSpd = function(){
+		
 		if(self.rb){
-			self.spdX = 5;
+			self.spdX = 5 * Math.cos( self.degree * Math.PI/180);
+			self.spdY = 5 * Math.sin(self.degree * Math.PI/180);
 		}	
 		if(self.lb){
-			self.spdX = -5;
+			self.spdX = -5 * Math.cos( self.degree * Math.PI/180);
+			self.spdY = -5 * Math.sin(self.degree * Math.PI/180);
 		}
 		if(self.ub){
-			self.spdY = -5;
+			self.spdX = 5 * Math.sin( self.degree * Math.PI/180);
+			self.spdY = -5 * Math.cos( self.degree * Math.PI/180);
+			console.log("FSTSPDX: "+self.spdX + "SPDY: "+self.spdY);
+			
 		}
 		if(self.db){
-			self.spdY = 5;
+			self.spdX = -5 * Math.sin( self.degree * Math.PI/180);
+			self.spdY = 5 * Math.cos( self.degree * Math.PI/180);
+			
 		}
 		
-		if(self.ub == self.db){
-			self.spdY = 0;
+		//diagonals
+		if(self.rb && self.ub){
+			console.log("R + U");
+			self.spdX = 5 * Math.sin( self.degree * Math.PI/180) + 5 * Math.cos( self.degree * Math.PI/180);
+			self.spdY = 5 * Math.sin(self.degree * Math.PI/180) + -5 * Math.cos( self.degree * Math.PI/180);
+			console.log("RU INSIDE 	SPDX: "+self.spdX + "SPDY: "+self.spdY);
+		}	
+		if(self.lb && self.ub){
+			console.log("L + U");
+			self.spdX = -5 * Math.cos( self.degree * Math.PI/180) + 5 * Math.sin( self.degree * Math.PI/180);
+			self.spdY = -5 * Math.sin(self.degree * Math.PI/180) + -5 * Math.cos( self.degree * Math.PI/180);
 		}
-		if(self.rb == self.lb){
+		if(self.rb && self.db){	
+			console.log("R + D");
+			self.spdX = 5 * Math.cos( self.degree * Math.PI/180) + -5 * Math.sin( self.degree * Math.PI/180);
+			self.spdY = 5 * Math.sin( self.degree * Math.PI/180) + 5 * Math.cos( self.degree * Math.PI/180);
+		}
+		if(self.lb && self.db){
+			console.log("L + D");
+			self.spdX = -5 * Math.cos( self.degree * Math.PI/180) + -5 * Math.sin( self.degree * Math.PI/180);
+			self.spdY = -5 * Math.sin(self.degree * Math.PI/180) + 5 * Math.cos( self.degree * Math.PI/180);
+		}
+		
+		if(self.ub && self.db && self.rb && self.lb){
+			console.log("NUTHIN PRESS");
+			self.spdY = 0;
 			self.spdX = 0;
 		}
-		
-		
+		if(!self.ub && !self.db && !self.rb && !self.lb){
+			console.log("NUTHIN PRESS");
+			self.spdY = 0;
+			self.spdX = 0;
+		}
+		/*
+		if(self.rb == self.lb){
+			self.spdX = 0;
+		}*/
+		console.log("SCONDSPDX: "+self.spdX + "SPDY: "+self.spdY);
 		
 	}
 	self.getInitPack = function(){
@@ -99,15 +156,18 @@ var Player = function(id){
 			id:self.id,
 			x:self.x,
 			y:self.y,
+			degree:self.degree,
 			number:self.number,
 			username:self.username,
 		};
 	}
 	self.getUpdatePack = function(){
+		//console.log("degree is "+self.degree);
 		return{
 			x:self.x,
 			y:self.y,
 			id:self.id,
+			degree:self.degree,
 			username:self.username,
 		};
 	}
@@ -123,18 +183,28 @@ Player.onConnect = function(socket){
 	console.log("PLAYER ON CONNECT USERNAME IS "+player.username);
 	playerCount++;
 	socket.on('keyPress',function(data){
+		console.log(data.inputId + "is " +data.state);
 		if(data.inputId==='a'){
 			player.lb = data.state;
 		}
-		else if(data.inputId==='d'){
+		if(data.inputId==='d'){
 			player.rb = data.state;
 		}
-		else if(data.inputId==='w'){
+		if(data.inputId==='w'){
 			player.ub = data.state;
 		}
-		else if(data.inputId==='s'){
+		if(data.inputId==='s'){
 			player.db = data.state;
 		}
+		
+		
+		if(data.inputId==='e'){
+			player.eb = data.state;
+		}
+		if(data.inputId==='q'){
+			player.qb = data.state;
+		}
+		
 	});
 		
 	socket.emit('init',{
