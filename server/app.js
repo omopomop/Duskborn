@@ -75,14 +75,14 @@ var Player = function(id){
 	self.updateAngle = function(){
 		if(self.qb){
 			console.log("PRESSING Q");
-			self.degree -= 1;
+			self.degree -= 2;
 			if(self.degree < 0)
 				self.degree = 360;
 		}
 		
 		if(self.eb){
 			console.log("PRESSING E");
-			self.degree += 1;
+			self.degree += 2;
 			if(self.degree > 360)
 				self.degree = 0;
 		}

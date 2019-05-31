@@ -83,7 +83,8 @@
 		ctx.save();
 		var x = WIDTH/2 - Player.list[playerId].x;
 		var y = HEIGHT/2 - Player.list[playerId].y;
-		ctx.rotate(self.degree*Math.PI/180);
+		ctx.translate(WIDTH/2,HEIGHT/2);
+		ctx.rotate(Player.list[playerId].degree*-Math.PI/180);
 		ctx.drawImage(Img.map,x,y);
 		ctx.restore();
 	}
